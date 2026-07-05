@@ -1,0 +1,26 @@
+# Local stack: Sentra + a mock model. In production drop `mock-upstream`
+# and set SENTRA_UPSTREAM to your real provider.
+services:
+  sentra:
+    build: .
+    ports:
+      - "8100:8100"
+    environment:
+      SENTRA_PORT: "8100"
+      # for the self-contained demo, guard the mock model:
+      SENTRA_UPSTREAM: "http://mock-upstream:8090"
+      # in production instead use:
+      # SENTRA_UPSTREAM: "https://api.openai.com"
+    volumes:
+      - sentra-data:/app/data          # persist tenants + audit log
+    depends_on:
+      - mock-upstream
+
+  mock-upstream:
+    build: .
+    command: ["python3", "demo/mock_upstream.py"]
+    expose:
+      - "8090"
+
+volumes:
+  sentra-data:
