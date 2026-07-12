@@ -42,14 +42,40 @@ Membra/
 folder beside them — so "works on my machine, breaks once installed" bugs show
 up immediately. It's the single most valuable packaging habit.
 
-**Do it** (rename `sentra/` → `src/membra/`):
+**Do it** — create the fresh package folder. The old prototype now lives in
+[`reference/`](../../reference/README.md); we build `src/membra/` from scratch
+and **copy the reusable detection core forward** as each module needs it
+(rebranding strings, keeping the logic):
 
 ```bash
-mkdir -p src
-mv sentra src/membra
+mkdir -p src/membra
+# copy the brand-neutral cores you'll reuse (rebrand them as you go):
+cp -r reference/sentra/detectors      src/membra/detectors
+cp reference/sentra/engine.py         src/membra/engine.py
+cp reference/sentra/auth.py           src/membra/auth.py
+cp reference/sentra/store.py          src/membra/store.py
+cp reference/sentra/templates.py      src/membra/templates.py
+cp reference/sentra/docs_page.py      src/membra/docs_page.py
+# the trained ML model the detectors need:
+mkdir -p src/membra/data
+cp reference/data/injection_model.json src/membra/data/injection_model.json
 ```
 
-Then fix the two brand touchpoints inside `src/membra/__init__.py`:
+> You'll rewrite `app.py`/`gateway.py`/`sdk.py` fresh (Modules 2 & 4) — those are
+> the parts that change most for Membra, so we don't copy them. The detectors,
+> engine, auth, and store are reused almost as-is.
+
+**One fix after copying:** the model now lives *inside* the package
+(`src/membra/data/`), so update the path in
+`src/membra/detectors/ml_injection.py`:
+
+```python
+# was: os.path.join(os.path.dirname(__file__), "..", "..", "data", "injection_model.json")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "injection_model.json")
+```
+(One less `".."` — from `detectors/` up to `membra/`, then into `data/`.)
+
+Now create `src/membra/__init__.py`:
 
 ```python
 # src/membra/__init__.py

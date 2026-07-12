@@ -12,7 +12,7 @@ venv/
 env/
 
 # Runtime data
-data/*.db
+*.db
 
 # OS / editor
 .DS_Store
